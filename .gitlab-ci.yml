@@ -14,7 +14,7 @@ stages:
   - tf_destroy
 
 gen_ssh_keys:
-  image: bash:lastest
+  image: bash:latest
   stage: ssh_gen
   script:
     - apk update && apk add openssh-client
