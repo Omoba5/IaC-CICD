@@ -36,7 +36,7 @@ resource "google_compute_subnetwork" "tf_subnet" {
 # Create Virtual Machine
 resource "google_compute_instance" "vm_instance" {
   name                      = var.environment
-  machine_type              = "n1-standard-2"
+  machine_type              = "e2-small"
   tags                      = ["${var.environment}"]
   allow_stopping_for_update = true
 
