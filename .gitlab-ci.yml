@@ -28,7 +28,7 @@ variables:
         terraform init 
         -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/default"
         -backend-config="lock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock" 
-        -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock
+        -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock"
         -backend-config="username=root" 
         -backend-config="password=${GITLAB_ACCESS_TOKEN}" 
         -backend-config="lock_method=POST" 
