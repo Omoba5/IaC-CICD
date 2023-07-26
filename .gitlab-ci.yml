@@ -1,0 +1,94 @@
+# // TODO:
+# - create the stages
+# - generate ssh_keys
+# - terraform plan
+# - terraform apply
+# - ansible_config
+# - terrform destroy
+
+stages:
+  - ssh_gen
+  - tf_plan
+  - tf_apply
+  - ans_config
+  - tf_destroy  
+
+variables:
+  TERRAFORM_VERSION: 1.5.0
+
+.provision:
+  script:
+    - apk update && apk upgrade
+    - apk add unzip
+    - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
+    - unzip terraform.zip && mv ./terraform /bin
+    - terraform -version
+    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' ./main.tf
+    - > 
+        terraform init 
+        -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/default"
+        -backend-config="lock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock" 
+        -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock"
+        -backend-config="username=root" 
+        -backend-config="password=${GITLAB_ACCESS_TOKEN}" 
+        -backend-config="lock_method=POST" 
+        -backend-config="unlock_method=DELETE" 
+        -backend-config="retry_wait_min=5"
+
+gen_ssh_keys:
+  image: bash:latest
+  stage: ssh_gen
+  script:
+    - apk update && apk add openssh-client
+    - mkdir .keys && cd ./.keys
+    - ssh-keygen -f vm_keys -q -t rsa -N "" && echo "Keys successfully generated"
+  artifacts:
+    name: ssh-keys
+    expire_in: "1 day"
+    paths: 
+      - .keys
+ 
+dry_provision:
+  image: alpine:3.18.2
+  stage: tf_plan
+  script:
+    - !reference [.provision, script]
+    - terraform validate
+    - terraform plan
+
+actual_provision:
+  image: alpine:3.18.2
+  stage: tf_apply
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - !reference [.provision, script]
+    - terraform apply -auto-approve
+  artifacts:
+    name: vm_ip
+    expire_in: "1 day"
+    paths:
+      - vm_ip.txt
+
+ansible_conf:
+  image: python:3.9.17-slim-bullseye
+  stage: ans_config
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - sudo apt-get update && sudo apt-get install ansible
+    - ansible --version
+    - ansible-playbook ansible-playbook.yml
+
+destroy_tf:
+  image: alpine:3.18.2
+  stage: tf_destroy
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - !reference [.provision, script]
+    - terraform destroy -auto-approve
+  when: manual

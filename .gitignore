@@ -1,0 +1,7 @@
+# Exclude a Terraform State Files and Provider files
+.terraform*
+.terraform
+terraform*
+
+# Exclude Key Pair used in testing locally
+.keys/*
