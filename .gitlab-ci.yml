@@ -1,10 +1,10 @@
-// TODO:
-- create the stages
-- generate ssh_keys
-- terraform plan
-- terraform apply
-- ansible_config
-- terrform destroy
+# // TODO:
+# - create the stages
+# - generate ssh_keys
+# - terraform plan
+# - terraform apply
+# - ansible_config
+# - terrform destroy
 
 stages:
   - ssh_gen
