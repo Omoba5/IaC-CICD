@@ -23,7 +23,7 @@ gen_ssh_keys:
   artifacts:
     name: ssh-keys
     expire_in: "1 day"
-    path: 
+    paths: 
       - .keys
 
 dry_provision:
@@ -46,7 +46,7 @@ actual_provision:
   artifacts:
     name: vm_ip
     expire_in: "1 day"
-    path:
+    paths:
       - vm_ip.txt
 
 ansible_conf:
