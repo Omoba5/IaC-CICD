@@ -1,3 +1,4 @@
+# Declare provider module to be used
 terraform {
   required_providers {
     google = {
@@ -7,19 +8,22 @@ terraform {
   }
 }
 
+# Authenticate with GCP Service account
 provider "google" {
   credentials = file("..\\gcp-credential.json")
 
-  project = "testing-387012"
+  project = "infrastructure-393911"
   region  = "us-central1"
   zone    = "us-central1-c"
 }
 
+# Create Network (VPC)
 resource "google_compute_network" "vpc_network" {
-  name                    = "terraform-network"
+  name                    = var.network_name
   auto_create_subnetworks = false
 }
 
+# Create Subnetwork
 resource "google_compute_subnetwork" "tf_subnet" {
   name          = "tf-subnetwork"
   ip_cidr_range = "10.128.10.0/24"
@@ -27,17 +31,26 @@ resource "google_compute_subnetwork" "tf_subnet" {
   network       = google_compute_network.vpc_network.name
 }
 
+# Create Virtual Machine
 resource "google_compute_instance" "vm_instance" {
-  name         = "terraform-instance"
-  machine_type = "n1-standard-1"
-  tags         = ["web", "dev"]
+  name         = var.environment
+  machine_type = "n1-standard-2"
+  tags         = ["${var.environment}"]
+  allow_stopping_for_update = true
 
   boot_disk {
+    # auto_delete = false
     initialize_params {
       image = "debian-cloud/debian-11"
     }
   }
 
+
+  # Adding SSH keys
+  metadata = {
+    ssh-keys = "${var.ssh_user}:${file(var.pubkey_file)}"
+  }
+  
   network_interface {
     network    = google_compute_network.vpc_network.name
     subnetwork = google_compute_subnetwork.tf_subnet.name
@@ -46,6 +59,7 @@ resource "google_compute_instance" "vm_instance" {
   }
 }
 
+# Create firewall rules
 resource "google_compute_firewall" "rules" {
   name        = "tf-firewall-rule"
   network     = google_compute_network.vpc_network.name
@@ -57,5 +71,11 @@ resource "google_compute_firewall" "rules" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["web"]
+  target_tags   = ["${var.environment}"]
+}
+
+# Copy the IP address into a txt file
+resource "local_file" "vm_ip" {
+  content  = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
+  filename = "./vm_ip.txt"
 }

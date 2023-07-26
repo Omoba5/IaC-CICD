@@ -1,0 +1,10 @@
++ Setup Gitlab repository
++ Setup Gitlab runner and connect to server
+- Create and populate main.tf file
+- Create and populate ansible files
+- Create and populate .gitlab-ci.yml file
+- Test pipeline with basic Setup
+- Modify to use the Module approach and test
+- Create multiple environments using terraform
+- Test pipeline
+- Implement change on bincom_azure project

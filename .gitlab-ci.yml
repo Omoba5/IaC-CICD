@@ -1,4 +1,72 @@
-testing:
-  image: ubuntu
+// TODO:
+- create the stages
+- generate ssh_keys
+- terraform plan
+- terraform apply
+- ansible_config
+- terrform destroy
+
+stages:
+  - ssh_gen
+  - tf_plan
+  - tf_apply
+  - ans_config
+  - tf_destroy
+
+gen_ssh_keys:
+  image: bash:lastest
+  stage: ssh_gen
   script:
-    - echo "Testing the pipeline" 
+    - apk update && apk add openssh-client
+    - mkdir .keys && cd ./.keys
+    - ssh-keygen -f vm_keys -q -t rsa -N "" && echo "Keys successfully generated"
+  artifacts:
+    name: ssh-keys
+    expire_in: "1 day"
+    path: 
+      - .keys
+
+dry_provision:
+  image: hashicorp/terraform:1.5
+  stage: tf_plan
+  script:
+    - terraform init
+    - terraform validate
+    - terraform plan
+
+actual_provision:
+  image: hashicorp/terraform:1.5
+  stage: tf_apply
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - terraform init
+    - terraform apply -auto-approve
+  artifacts:
+    name: vm_ip
+    expire_in: "1 day"
+    path:
+      - vm_ip.txt
+
+ansible_conf:
+  image: python:3.9.17-slim-bullseye
+  stage: ans_config
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - sudo apt-get update && sudo apt-get install ansible
+    - ansible --version
+    - ansible-playbook ansible-playbook.yml
+
+destroy_tf:
+  image: hashicorp/terraform:1.5
+  stage: tf_destroy
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - terraform init
+    - terraform destroy -auto-approve
+  when: manual
