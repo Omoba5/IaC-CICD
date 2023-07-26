@@ -36,13 +36,13 @@ gen_ssh_keys:
     expire_in: "1 day"
     paths: 
       - .keys
-
+ 
 dry_provision:
   image: alpine:3.18.2
   stage: tf_plan
   script:
     - !reference [.provision, script]
-    - sed -i "s/CREDENTIAL/${CREDENTIAL}/g" ./main.tf
+    - sed -i 's/CREDENTIAL/'"${CREDENTIAL}"'/g' ./main.tf
     - terraform init
     - terraform validate
     - terraform plan
