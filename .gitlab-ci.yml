@@ -42,7 +42,7 @@ dry_provision:
   stage: tf_plan
   script:
     - !reference [.provision, script]
-    - sed -i 's/CREDENTIAL/'"${CREDENTIAL}"'/g' ./main.tf
+    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' ./main.tf
     - terraform init
     - terraform validate
     - terraform plan
