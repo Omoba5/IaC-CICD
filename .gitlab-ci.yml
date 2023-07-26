@@ -42,6 +42,7 @@ dry_provision:
   stage: tf_plan
   script:
     - !reference [.provision, script]
+    - sed -i "s/CREDENTIAL/${CREDENTIAL}/g" ./main.tf
     - terraform init
     - terraform validate
     - terraform plan
@@ -54,6 +55,7 @@ actual_provision:
       - $CI_COMMIT_REF_NAME == "main"
   script:
     - !reference [.provision, script]
+    - sed -i "s/CREDENTIAL/${CREDENTIAL}/g" ./main.tf
     - terraform init
     - terraform apply -auto-approve
   artifacts:
@@ -81,6 +83,7 @@ destroy_tf:
       - $CI_COMMIT_REF_NAME == "main"
   script:
     - !reference [.provision, script]
+    - sed -i "s/CREDENTIAL/${CREDENTIAL}/g" ./main.tf
     - terraform init
     - terraform destroy -auto-approve
   when: manual
