@@ -13,6 +13,17 @@ stages:
   - ans_config
   - tf_destroy
 
+variables:
+  TERRAFORM_VERSION: 1.5.0
+
+.provision:
+  script:
+    - apk update && apk upgrade
+    - apk add unzip
+    - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
+    - unzip terraform.zip && mv ./terraform /bin
+    - terraform -version
+
 gen_ssh_keys:
   image: bash:latest
   stage: ssh_gen
@@ -27,20 +38,22 @@ gen_ssh_keys:
       - .keys
 
 dry_provision:
-  image: hashicorp/terraform:1.5
+  image: alpine:3.18.2
   stage: tf_plan
   script:
+    - !reference [.provision, script]
     - terraform init
     - terraform validate
     - terraform plan
 
 actual_provision:
-  image: hashicorp/terraform:1.5
+  image: alpine:3.18.2
   stage: tf_apply
   only:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
+    - !reference [.provision, script]
     - terraform init
     - terraform apply -auto-approve
   artifacts:
@@ -61,12 +74,13 @@ ansible_conf:
     - ansible-playbook ansible-playbook.yml
 
 destroy_tf:
-  image: hashicorp/terraform:1.5
+  image: alpine:3.18.2
   stage: tf_destroy
   only:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
+    - !reference [.provision, script]
     - terraform init
     - terraform destroy -auto-approve
   when: manual
