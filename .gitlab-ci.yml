@@ -11,7 +11,7 @@ stages:
   - tf_plan
   - tf_apply
   - ans_config
-  - tf_destroy
+  - tf_destroy  
 
 variables:
   TERRAFORM_VERSION: 1.5.0
@@ -23,6 +23,16 @@ variables:
     - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
     - unzip terraform.zip && mv ./terraform /bin
     - terraform -version
+    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' ./main.tf
+    - terraform init \
+          -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/default" \
+          -backend-config="lock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock" \
+          -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock" \
+          -backend-config="username=root" \
+          -backend-config="password=${GITLAB_ACCESS_TOKEN}" \
+          -backend-config="lock_method=POST" \
+          -backend-config="unlock_method=DELETE" \
+          -backend-config="retry_wait_min=5"
 
 gen_ssh_keys:
   image: bash:latest
@@ -42,8 +52,6 @@ dry_provision:
   stage: tf_plan
   script:
     - !reference [.provision, script]
-    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' ./main.tf
-    - terraform init
     - terraform validate
     - terraform plan
 
@@ -55,8 +63,6 @@ actual_provision:
       - $CI_COMMIT_REF_NAME == "main"
   script:
     - !reference [.provision, script]
-    - sed -i "s/CREDENTIAL/${CREDENTIAL}/g" ./main.tf
-    - terraform init
     - terraform apply -auto-approve
   artifacts:
     name: vm_ip
@@ -83,7 +89,5 @@ destroy_tf:
       - $CI_COMMIT_REF_NAME == "main"
   script:
     - !reference [.provision, script]
-    - sed -i "s/CREDENTIAL/${CREDENTIAL}/g" ./main.tf
-    - terraform init
     - terraform destroy -auto-approve
   when: manual

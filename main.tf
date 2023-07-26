@@ -6,6 +6,8 @@ terraform {
       version = "4.51.0"
     }
   }
+  backend "http" {
+  }
 }
 
 # Authenticate with GCP Service account
@@ -33,9 +35,9 @@ resource "google_compute_subnetwork" "tf_subnet" {
 
 # Create Virtual Machine
 resource "google_compute_instance" "vm_instance" {
-  name         = var.environment
-  machine_type = "n1-standard-2"
-  tags         = ["${var.environment}"]
+  name                      = var.environment
+  machine_type              = "n1-standard-2"
+  tags                      = ["${var.environment}"]
   allow_stopping_for_update = true
 
   boot_disk {
@@ -50,7 +52,7 @@ resource "google_compute_instance" "vm_instance" {
   metadata = {
     ssh-keys = "${var.ssh_user}:${file(var.pubkey_file)}"
   }
-  
+
   network_interface {
     network    = google_compute_network.vpc_network.name
     subnetwork = google_compute_subnetwork.tf_subnet.name
