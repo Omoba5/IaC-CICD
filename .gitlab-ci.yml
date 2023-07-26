@@ -78,7 +78,7 @@ ansible_conf:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
-    - apt-get update && apt-get install ansible
+    - apt-get update && apt-get install ansible -y
     - ansible --version
     - ansible-playbook ansible-playbook.yml
 
