@@ -80,7 +80,7 @@ ansible_conf:
   script:
     - apt-get update && apt-get install ansible -y
     - ansible --version
-    - chmod . 750
+    - chmod 750 .
     - ansible-playbook ansible-playbook.yml
 
 destroy_tf:
