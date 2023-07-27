@@ -51,6 +51,9 @@ gen_ssh_keys:
 dry_provision:
   image: alpine:3.18.2
   stage: tf_plan
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "gcp-terraform"
   script:
     - !reference [.provision, script]
     - terraform validate
@@ -65,6 +68,7 @@ actual_provision:
   script:
     - !reference [.provision, script]
     - terraform apply -auto-approve
+    - sleep 20
   artifacts:
     name: vm_ip
     expire_in: "1 day"
@@ -78,9 +82,10 @@ ansible_conf:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
+    - chmod 750 ansible_files
+    - cd ansible_files
     - apt-get update && apt-get install ansible -y
     - ansible --version
-    - chmod 750 .
     - ansible-playbook ansible-playbook.yml
 
 destroy_tf:
