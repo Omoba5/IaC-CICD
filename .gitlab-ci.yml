@@ -84,7 +84,7 @@ actual_provision:
     name: vm_ip
     expire_in: "1 day"
     paths:
-      - *_vm_ip.txt
+      - .*_vm_ip.txt$
 
 ansible_conf:
   image: python:3.9.17-slim-bullseye
