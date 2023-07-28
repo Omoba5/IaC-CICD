@@ -28,9 +28,9 @@ variables:
     - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
     - > 
         terraform init 
-        -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/default"
-        -backend-config="lock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock" 
-        -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/default/lock"
+        -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/${ENVIRONMENT}"
+        -backend-config="lock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/${ENVIRONMENT}/lock" 
+        -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/${ENVIRONMENT}/lock"
         -backend-config="username=root" 
         -backend-config="password=${GITLAB_ACCESS_TOKEN}" 
         -backend-config="lock_method=POST" 
@@ -95,9 +95,9 @@ ansible_conf:
       - $CI_COMMIT_REF_NAME == "main"
   script:
     - cat *_vm_ip.txt > vm_ip.txt
-    - sed -i 's#vm_keys#vm_keys_'"${ENVIRONMENT}"'#g' ansible.cfg
     - chmod 750 ansible_files
     - cd ansible_files
+    - sed -i 's#vm_keys#vm_keys_'"${ENVIRONMENT}"'#g' ansible.cfg
     - apt-get update && apt-get install ansible -y
     - ansible --version
     - ansible-playbook ansible-playbook.yml
