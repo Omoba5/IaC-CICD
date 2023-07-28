@@ -23,7 +23,8 @@ variables:
     - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
     - unzip terraform.zip && mv ./terraform /bin
     - terraform -version
-    - cd dev
+    - cd $ENVIRONMENT
+    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'#g' modules/debian_vm/variables.tf
     - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
     - > 
         terraform init 
@@ -62,6 +63,9 @@ dry_provision:
     - !reference [.provision, script]
     - terraform validate
     - terraform plan
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
 
 actual_provision:
   image: alpine:3.18.2

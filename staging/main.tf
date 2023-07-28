@@ -4,5 +4,4 @@ module "debian_vm" {
   
   # Input variables
   environment = "prod"
-  network_name = "cisco"
 }
