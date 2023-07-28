@@ -23,7 +23,8 @@ variables:
     - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
     - unzip terraform.zip && mv ./terraform /bin
     - terraform -version
-    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' ./modules/debian_vm/main.tf
+    - ls -alh
+    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' modules/debian_vm/main.tf
     - > 
         terraform init 
         -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/default"
