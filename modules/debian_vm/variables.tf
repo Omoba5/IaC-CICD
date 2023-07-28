@@ -7,13 +7,7 @@ variable "ssh_user" {
 variable "pubkey_file" {
   type        = string
   description = "SSH public key"
-  default     = "./.keys/vm_keys.pub"
-}
-
-variable "network_name" {
-  type        = string
-  description = "The name of the VPC network"
-  default     = "terraform-network"
+  default     = "../.keys/vm_keys.pub"
 }
 
 variable "environment" {

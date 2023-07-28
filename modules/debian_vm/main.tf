@@ -1,33 +1,12 @@
-# Declare provider module to be used
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "4.51.0"
-    }
-  }
-  backend "http" {
-  }
-}
-
-# Authenticate with GCP Service account
-provider "google" {
-  credentials = file("CREDENTIAL")
-
-  project = "infrastructure-393911"
-  region  = "us-central1"
-  zone    = "us-central1-c"
-}
-
 # Create Network (VPC)
 resource "google_compute_network" "vpc_network" {
-  name                    = var.network_name
+  name                    = "${var.environment}-network"
   auto_create_subnetworks = false
 }
 
 # Create Subnetwork
 resource "google_compute_subnetwork" "tf_subnet" {
-  name          = "tf-subnetwork"
+  name          = "${var.environment}-subnetwork"
   ip_cidr_range = "10.128.10.0/24"
   region        = "us-central1"
   network       = google_compute_network.vpc_network.name
@@ -47,7 +26,6 @@ resource "google_compute_instance" "vm_instance" {
     }
   }
 
-
   # Adding SSH keys
   metadata = {
     ssh-keys = "${var.ssh_user}:${file(var.pubkey_file)}"
@@ -63,7 +41,7 @@ resource "google_compute_instance" "vm_instance" {
 
 # Create firewall rules
 resource "google_compute_firewall" "rules" {
-  name        = "tf-firewall-rule"
+  name        = "fwr-${var.environment}"
   network     = google_compute_network.vpc_network.name
   description = "Creates firewall rule targeting tagged instances for terraform infrastructure"
 
@@ -79,5 +57,5 @@ resource "google_compute_firewall" "rules" {
 # Copy the IP address into a txt file
 resource "local_file" "vm_ip" {
   content  = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
-  filename = "./vm_ip.txt"
+  filename = "../IPs/${var.environment}_vm_ip.txt"
 }

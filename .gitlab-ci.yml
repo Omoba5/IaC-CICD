@@ -23,7 +23,9 @@ variables:
     - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
     - unzip terraform.zip && mv ./terraform /bin
     - terraform -version
-    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' ./main.tf
+    - cd $ENVIRONMENT
+    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'#g' ../modules/debian_vm/variables.tf
+    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
     - > 
         terraform init 
         -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/default"
@@ -41,7 +43,10 @@ gen_ssh_keys:
   script:
     - apk update && apk add openssh-client
     - mkdir .keys && cd ./.keys
-    - ssh-keygen -f vm_keys -q -t rsa -N "" && echo "Keys successfully generated"
+    - ssh-keygen -f vm_keys_${ENVIRONMENT} -q -t rsa -N "" && echo "Keys successfully generated"
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
   artifacts:
     name: ssh-keys
     expire_in: "1 day"
@@ -51,10 +56,16 @@ gen_ssh_keys:
 dry_provision:
   image: alpine:3.18.2
   stage: tf_plan
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "gcp-terraform"
   script:
     - !reference [.provision, script]
     - terraform validate
     - terraform plan
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
 
 actual_provision:
   image: alpine:3.18.2
@@ -65,11 +76,15 @@ actual_provision:
   script:
     - !reference [.provision, script]
     - terraform apply -auto-approve
+    - sleep 20
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
   artifacts:
     name: vm_ip
     expire_in: "1 day"
     paths:
-      - vm_ip.txt
+      - IPs
 
 ansible_conf:
   image: python:3.9.17-slim-bullseye
@@ -78,9 +93,11 @@ ansible_conf:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
+    - cat IPs/* > vm_ip.txt
+    - chmod 750 ansible_files
+    - cd ansible_files
     - apt-get update && apt-get install ansible -y
     - ansible --version
-    - chmod 750 .
     - ansible-playbook ansible-playbook.yml
 
 destroy_tf:
@@ -93,3 +110,6 @@ destroy_tf:
     - !reference [.provision, script]
     - terraform destroy -auto-approve
   when: manual
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
