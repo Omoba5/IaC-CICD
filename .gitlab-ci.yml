@@ -94,7 +94,8 @@ ansible_conf:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
-    - cat *_vm_ip.txt > vm_ip.txt
+    - cat ${ENVIRONMENT}_vm_ip.txt >> vm_ip.txt
+    - cat vm_ip.txt
     - chmod 750 ansible_files
     - cd ansible_files
     - sed -i 's#vm_keys#vm_keys_'"${ENVIRONMENT}"'#g' ansible.cfg
