@@ -7,7 +7,7 @@ variable "ssh_user" {
 variable "pubkey_file" {
   type        = string
   description = "SSH public key"
-  default     = "./.keys/vm_keys.pub"
+  default     = "../.keys/vm_keys.pub"
 }
 
 variable "network_name" {
