@@ -3,5 +3,5 @@ module "debian_vm" {
   source = "../modules/debian_vm"
   
   # Input variables
-  environment = "prod"
+  environment = "dev"
 }
