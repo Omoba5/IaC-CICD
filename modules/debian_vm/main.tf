@@ -1,12 +1,12 @@
 # Create Network (VPC)
 resource "google_compute_network" "vpc_network" {
-  name                    = var.network_name
+  name                    = "${var.environment}_network"
   auto_create_subnetworks = false
 }
 
 # Create Subnetwork
 resource "google_compute_subnetwork" "tf_subnet" {
-  name          = "tf-subnetwork"
+  name          = "${var.environment}_subnetwork"
   ip_cidr_range = "10.128.10.0/24"
   region        = "us-central1"
   network       = google_compute_network.vpc_network.name
@@ -41,7 +41,7 @@ resource "google_compute_instance" "vm_instance" {
 
 # Create firewall rules
 resource "google_compute_firewall" "rules" {
-  name        = "tf-firewall-rule"
+  name        = "fwr_${var.environment}"
   network     = google_compute_network.vpc_network.name
   description = "Creates firewall rule targeting tagged instances for terraform infrastructure"
 
@@ -57,5 +57,5 @@ resource "google_compute_firewall" "rules" {
 # Copy the IP address into a txt file
 resource "local_file" "vm_ip" {
   content  = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
-  filename = "../vm_ip.txt"
+  filename = "../IPs/${var.environment}_vm_ip.txt"
 }

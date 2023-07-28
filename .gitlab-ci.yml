@@ -42,7 +42,10 @@ gen_ssh_keys:
   script:
     - apk update && apk add openssh-client
     - mkdir .keys && cd ./.keys
-    - ssh-keygen -f vm_keys -q -t rsa -N "" && echo "Keys successfully generated"
+    - ssh-keygen -f vm_keys_${ENVIRONMENT} -q -t rsa -N "" && echo "Keys successfully generated"
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
   artifacts:
     name: ssh-keys
     expire_in: "1 day"
@@ -74,7 +77,7 @@ actual_provision:
     name: vm_ip
     expire_in: "1 day"
     paths:
-      - vm_ip.txt
+      - IPs
 
 ansible_conf:
   image: python:3.9.17-slim-bullseye
@@ -83,6 +86,7 @@ ansible_conf:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
+    - cat IPs/* > vm_ip.txt
     - chmod 750 ansible_files
     - cd ansible_files
     - apt-get update && apt-get install ansible -y

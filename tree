@@ -17,6 +17,25 @@ terraform
 Files and Folders with star are created by the pipeline
 
 terraform
+    ├── provider.tf
+    ├── main.tf
+    ├──	backend.tf
+	├── README.md
+    ├── .gitlab-ci.yml
+    ├── .keys*
+    │     ├── vm_keys*
+    │     └── vm_keys.pub*
+	├── ansible_files
+	│	├── install_nginx.yml
+	│	└── ansible.cfg
+    ├── vm_ips
+    │   └── vm_ip1.txt*
+    └── modules
+        └── ubuntu_vm
+            ├── main.tf
+            └── variables.tf
+
+terraform
     ├── dev
     │    ├── provider.tf
     │    ├── main.tf
@@ -36,6 +55,32 @@ terraform
             ├── main.tf
             └── variables.tf
 
-
-
+terraform
+    ├── dev
+    │    ├── provider.tf
+    │    ├── main.tf
+    │    └── backend.tf
+    ├── staging
+    │    ├── provider.tf
+    │    ├── main.tf
+    │    └── backend.tf
+    ├── prod
+    │    ├── provider.tf
+    │    ├── main.tf
+    │    └── backend.tf
+	├── README.md
+    ├── .gitlab-ci.yml
+    ├── .keys*
+    │     ├── vm_keys*
+    │     └── vm_keys.pub*
+	├── ansible_files
+	│	├── install_nginx.yml
+	│	└── ansible.cfg
+    ├── vm_ips
+    │   └── vm_ip1.txt*
+    └── modules
+        └── ubuntu_vm
+            ├── main.tf
+            └── variables.tf
+            
 This file gives us an overview of the file structure of the entire repository.
