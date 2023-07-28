@@ -24,7 +24,7 @@ variables:
     - unzip terraform.zip && mv ./terraform /bin
     - terraform -version
     - cd $ENVIRONMENT
-    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'#g' modules/debian_vm/variables.tf
+    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'#g' ../modules/debian_vm/variables.tf
     - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
     - > 
         terraform init 
