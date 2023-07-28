@@ -24,7 +24,7 @@ variables:
     - unzip terraform.zip && mv ./terraform /bin
     - terraform -version
     - cd $ENVIRONMENT
-    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'#g' ../modules/debian_vm/variables.tf
+    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'.pub#g' ../modules/debian_vm/variables.tf
     - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
     - > 
         terraform init 
@@ -84,21 +84,26 @@ actual_provision:
     name: vm_ip
     expire_in: "1 day"
     paths:
-      - IPs
+      - *_vm_ip.txt
 
 ansible_conf:
   image: python:3.9.17-slim-bullseye
   stage: ans_config
+  allow_failure: true
   only:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
   script:
-    - cat IPs/* > vm_ip.txt
+    - cat *_vm_ip.txt > vm_ip.txt
+    - sed -i 's#vm_keys#vm_keys_'"${ENVIRONMENT}"'#g' ansible.cfg
     - chmod 750 ansible_files
     - cd ansible_files
     - apt-get update && apt-get install ansible -y
     - ansible --version
     - ansible-playbook ansible-playbook.yml
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
 
 destroy_tf:
   image: alpine:3.18.2
