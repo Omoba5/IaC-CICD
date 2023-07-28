@@ -17,9 +17,10 @@ terraform
 Files and Folders with star are created by the pipeline
 
 terraform
-    ├── provider.tf
-    ├── main.tf
-    ├──	backend.tf
+    ├── dev
+    │    ├── provider.tf
+    │    ├── main.tf
+    │    └── backend.tf
 	├── README.md
     ├── .gitlab-ci.yml
     ├── .keys*
@@ -34,7 +35,7 @@ terraform
         └── ubuntu_vm
             ├── main.tf
             └── variables.tf
-            
+
 
 
 This file gives us an overview of the file structure of the entire repository.
