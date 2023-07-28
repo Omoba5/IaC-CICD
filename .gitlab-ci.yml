@@ -77,6 +77,9 @@ actual_provision:
     - !reference [.provision, script]
     - terraform apply -auto-approve
     - sleep 20
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
   artifacts:
     name: vm_ip
     expire_in: "1 day"
@@ -107,3 +110,6 @@ destroy_tf:
     - !reference [.provision, script]
     - terraform destroy -auto-approve
   when: manual
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
