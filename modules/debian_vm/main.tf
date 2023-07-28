@@ -1,12 +1,12 @@
 # Create Network (VPC)
 resource "google_compute_network" "vpc_network" {
-  name                    = "${var.environment}_network"
+  name                    = "${var.environment}-network"
   auto_create_subnetworks = false
 }
 
 # Create Subnetwork
 resource "google_compute_subnetwork" "tf_subnet" {
-  name          = "${var.environment}_subnetwork"
+  name          = "${var.environment}-subnetwork"
   ip_cidr_range = "10.128.10.0/24"
   region        = "us-central1"
   network       = google_compute_network.vpc_network.name
@@ -41,7 +41,7 @@ resource "google_compute_instance" "vm_instance" {
 
 # Create firewall rules
 resource "google_compute_firewall" "rules" {
-  name        = "fwr_${var.environment}"
+  name        = "fwr-${var.environment}"
   network     = google_compute_network.vpc_network.name
   description = "Creates firewall rule targeting tagged instances for terraform infrastructure"
 
