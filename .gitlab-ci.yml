@@ -15,27 +15,7 @@ stages:
 
 variables:
   TERRAFORM_VERSION: 1.5.0
-
-.provision:
-  script:
-    - apk update && apk upgrade
-    - apk add unzip
-    - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
-    - unzip terraform.zip && mv ./terraform /bin
-    - terraform -version
-    - cd $ENVIRONMENT
-    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'.pub#g' ../modules/debian_vm/variables.tf
-    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
-    - > 
-        terraform init 
-        -backend-config="address=http://34.125.152.235/api/v4/projects/1/terraform/state/${ENVIRONMENT}"
-        -backend-config="lock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/${ENVIRONMENT}/lock" 
-        -backend-config="unlock_address=http://34.125.152.235/api/v4/projects/1/terraform/state/${ENVIRONMENT}/lock"
-        -backend-config="username=root" 
-        -backend-config="password=${GITLAB_ACCESS_TOKEN}" 
-        -backend-config="lock_method=POST" 
-        -backend-config="unlock_method=DELETE" 
-        -backend-config="retry_wait_min=5"
+  TF_ADDRESS: http://34.125.152.235/api/v4/projects/1/terraform/state
 
 gen_ssh_keys:
   image: bash:latest
@@ -52,6 +32,27 @@ gen_ssh_keys:
     expire_in: "1 day"
     paths: 
       - .keys
+
+.provision:
+  script:
+    - apk update && apk upgrade
+    - apk add unzip
+    - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_386.zip
+    - unzip terraform.zip && mv ./terraform /bin
+    - terraform -version
+    - cd $ENVIRONMENT
+    - sed -i 's#vm_keys.pub#vm_keys_'"${ENVIRONMENT}"'.pub#g' ../modules/debian_vm/variables.tf
+    - sed -i 's#CREDENTIAL#'"${CREDENTIAL}"'#g' provider.tf
+    - > 
+        terraform init 
+        -backend-config="address=${TF_ADDRESS}/${ENVIRONMENT}"
+        -backend-config="lock_address=${TF_ADDRESS}/${ENVIRONMENT}/lock" 
+        -backend-config="unlock_address=${TF_ADDRESS}/${ENVIRONMENT}/lock"
+        -backend-config="username=root" 
+        -backend-config="password=${GITLAB_ACCESS_TOKEN}" 
+        -backend-config="lock_method=POST" 
+        -backend-config="unlock_method=DELETE" 
+        -backend-config="retry_wait_min=5"
  
 dry_provision:
   image: alpine:3.18.2
@@ -70,6 +71,7 @@ dry_provision:
 actual_provision:
   image: alpine:3.18.2
   stage: tf_apply
+  allow_failure: true
   only:
     variables:
       - $CI_COMMIT_REF_NAME == "main"
@@ -95,7 +97,6 @@ ansible_conf:
       - $CI_COMMIT_REF_NAME == "main"
   script:
     - cat ${ENVIRONMENT}_vm_ip.txt >> vm_ip.txt
-    - cat vm_ip.txt
     - chmod 750 ansible_files
     - cd ansible_files
     - sed -i 's#vm_keys#vm_keys_'"${ENVIRONMENT}"'#g' ansible.cfg
@@ -106,7 +107,21 @@ ansible_conf:
     matrix: 
       - ENVIRONMENT: [dev, staging, prod]
 
-destroy_tf:
+dry_destroy_tf:
+  image: alpine:3.18.2
+  stage: tf_destroy
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == "main"
+  script:
+    - !reference [.provision, script]
+    - terraform plan -destroy
+  when: manual
+  parallel:
+    matrix: 
+      - ENVIRONMENT: [dev, staging, prod]
+
+actual_destroy_tf:
   image: alpine:3.18.2
   stage: tf_destroy
   only:
