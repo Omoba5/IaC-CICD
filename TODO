@@ -5,14 +5,15 @@ PART 1
 + Create and populate ansible files
 + Create and populate .gitlab-ci.yml file
 + Test pipeline with basic Setup
-- Test full pipeline with basic Setup (with all the jobs)
-- Modify to use the Module approach and test
-- Create multiple environments using terraform
-- Test pipeline
++ Test full pipeline with basic Setup (with all the jobs)
++ Modify to use the Module approach and test
++ Create multiple environments using terraform
++ Test pipeline
 - Implement change on bincom_azure project
 
 PART 2
 - Add a java website that has test on it
+- Trigger the job using the terraform pipeline
 - Add and populate the following jobs:-
   - test
   - build
