@@ -9,7 +9,6 @@ PART 1
 + Modify to use the Module approach and test
 + Create multiple environments using terraform
 + Test pipeline
-- Implement change on bincom_azure project
 
 PART 2
 - Add a java website that has test on it

@@ -15,7 +15,7 @@ stages:
 
 variables:
   TERRAFORM_VERSION: 1.5.0
-  TF_ADDRESS: http://34.125.152.235/api/v4/projects/1/terraform/state
+  TF_ADDRESS: https://gitlab.com/api/v4/projects/48600931/terraform/state
 
 gen_ssh_keys:
   image: bash:latest
