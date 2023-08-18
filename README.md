@@ -1,7 +1,7 @@
-# Documentation of Infrastructure as Code CI/CD using Gitlab-CI, Terraform and Ansible
+# Infrastructure as Code CI/CD using Gitlab-CI, Terraform and Ansible
 
 ## Pre-requisites
-You will need to create a Google Cloud Platform Service Account and get its credentials in json format and also create a Gitlab Personal Access Token. To create a GCP service account follow these [steps](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/google-cloud-platform-build#set-up-gcp). To create a personal access token on Gitlab follow these [steps](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token). Save the GCP Service account credential as a variable named `CREDENTIAL` as a **file** and the Gitlab Personal Access Token as a variable named `GITLAB_ACCESS_TOKEN`.
+You will need to create a **Google Cloud Platform** Service Account and get its credentials in json format and also create a Gitlab Personal Access Token. To create a GCP service account follow these [steps](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/google-cloud-platform-build#set-up-gcp). To create a personal access token on Gitlab follow these [steps](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token). Save the GCP Service account credential as a variable named `CREDENTIAL` of type **file** and the Gitlab Personal Access Token as a variable named `GITLAB_ACCESS_TOKEN` of type **variable**.
 
 ## Objective:
 
